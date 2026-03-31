@@ -1,0 +1,2 @@
+# Cloudflare Worker 관련 파일 무시
+worker.js

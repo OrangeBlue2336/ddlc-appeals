@@ -547,6 +547,22 @@
     // 배포 후 본인의 Cloudflare Workers URL로 교체하세요.
     const WORKER_URL = 'https://ddlc-appeals-admin.snackcandy105.workers.dev';
 
+    // ── 폼 변경 상태 추적 (새로고침/닫기 방지용) ───────────────────────────
+    let isFormDirty = false;
+
+    // 폼 내용이 하나라도 변경되면 상태를 업데이트
+    document.getElementById('appeal-form').addEventListener('input', () => {
+      isFormDirty = true;
+    });
+
+    // 사용자가 페이지를 떠나려 할 때 경고 표시
+    window.addEventListener('beforeunload', (e) => {
+      if (isFormDirty) {
+        e.preventDefault();
+        e.returnValue = ''; // 최신 브라우저에서 기본 경고창을 띄우기 위한 필수 설정
+      }
+    });
+
     // ── 제출 버튼 활성/비활성화 ──────────────────────────────────────────
     function toggleSubmit() {
       document.getElementById('btn-submit').disabled =
@@ -597,6 +613,8 @@
         const data = await res.json();
 
         if (res.ok && data.appealId) {
+          isFormDirty = false;
+          
           // 폼 카드 숨기고 성공 화면 표시
           document.querySelector('.card').style.display = 'none';
           const screen = document.getElementById('success-screen');

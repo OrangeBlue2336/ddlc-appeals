@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>/r/DDLC Discord Ban Appeal Form</title>
 
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://orangeblue2336.github.io/ddlc-appeals/">
   <meta property="og:title" content="/r/DDLC Discord Ban Appeal Form">
@@ -497,7 +499,14 @@
           </div>
         </div>
       </div>
+      <div class="field">
+              </div>
 
+            <div class="field" style="display: flex; justify-content: center; margin-bottom: 24px;">
+              <div class="cf-turnstile" data-sitekey="0x4AAAAAACy-6qOJSaQY2AU5"></div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-submit" disabled>
       <!-- 제출 버튼 -->
       <button type="submit" class="btn-submit" id="btn-submit" disabled>
         Submit Appeal
@@ -594,8 +603,17 @@
       const unbanReason= document.getElementById('q-unbanreason').value.trim();
       const additional = document.getElementById('q-additional').value.trim();
 
+      // ★ Turnstile 응답 토큰 가져오기
+      const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
+
       if (!username || !discordId || !banDate || !banReason || !unbanReason) {
         alert('Please fill in all required fields.');
+        return;
+      }
+      
+      // ★ 캡차 체크 여부 확인
+      if (!turnstileResponse) {
+        alert('Please complete the Captcha verification.');
         return;
       }
 
@@ -607,7 +625,8 @@
         const res = await fetch(`${WORKER_URL}/appeal`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, discordId, banDate, banReason, unbanReason, additional })
+          // ★ turnstileToken을 body에 추가
+          body: JSON.stringify({ username, discordId, banDate, banReason, unbanReason, additional, turnstileToken: turnstileResponse })
         });
 
         const data = await res.json();
@@ -615,12 +634,10 @@
         if (res.ok && data.appealId) {
           isFormDirty = false;
           
-          // 폼 카드 숨기고 성공 화면 표시
           document.querySelector('.card').style.display = 'none';
           const screen = document.getElementById('success-screen');
           screen.style.display = 'block';
           document.getElementById('display-appeal-id').textContent = data.appealId;
-          // 복사 함수에서 쓸 수 있도록 전역에 저장
           window._appealId = data.appealId;
         } else {
           throw new Error(data.error || 'Unknown error');
@@ -629,6 +646,10 @@
         alert(`Failed to submit appeal: ${err.message}`);
         btn.disabled = false;
         btn.innerHTML = 'Submit Appeal';
+        // ★ 에러 발생 시 캡차를 다시 풀 수 있도록 초기화
+        if (typeof turnstile !== 'undefined') {
+          turnstile.reset();
+        }
       }
     });
 

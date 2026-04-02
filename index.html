@@ -57,6 +57,30 @@
       justify-content: flex-end;
       padding: 0 24px;
       z-index: 100;
+      gap: 12px;
+    }
+
+    /* ── Info 버튼 ── */
+    .btn-info {
+      background: #fff;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      font-style: italic;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, transform .15s;
+    }
+    .btn-info:hover {
+      border-color: var(--accent-start);
+      color: var(--accent-start);
+      transform: translateY(-1px);
     }
 
     /* ── Check Status 버튼 ── */
@@ -429,6 +453,7 @@
 
   <!-- ── 상단 고정 바 ── -->
   <div class="topbar">
+    <button class="btn-info" onclick="openInfoModal()" title="Information">i</button>
     <button class="btn-status" onclick="openStatusModal()">Check Status</button>
   </div>
 
@@ -548,6 +573,29 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="info-modal">
+    <div class="modal">
+      <h2>About & Help</h2>
+      
+      <div style="margin-top: 16px; margin-bottom: 24px; font-size: 14.5px; color: var(--text); line-height: 1.6;">
+        <p style="margin-bottom: 8px;"><strong>💻 GitHub Repository</strong></p>
+        <p style="color: var(--muted); margin-bottom: 16px;">
+          The source code for this appeal system is open source. You can view it here:<br>
+          <a href="https://github.com/orangeblue2336/ddlc-appeals" target="_blank" style="color: var(--accent-start); text-decoration: none; font-weight: 500;">GitHub - ddlc-appeals</a>
+        </p>
+
+        <p style="margin-bottom: 8px;"><strong>🐛 Bug Reports & Issues</strong></p>
+        <p style="color: var(--muted);">
+          If you encounter any errors or bugs while using this form, please report them by opening an <strong>Issue</strong> on the GitHub repository, or <a href="discord://-/users/1143199445035536404" style="color: var(--accent-start); text-decoration: none; font-weight: 500;">contact OrangeBlue2336 directly via Discord DM.</a>
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeInfoModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ── Workers 백엔드 URL ──────────────────────────────────────────────
     // 배포 후 본인의 Cloudflare Workers URL로 교체하세요.
@@ -601,7 +649,8 @@
       const additional = document.getElementById('q-additional').value.trim();
 
       // ★ Turnstile 응답 토큰 가져오기
-      const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
+      const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+      const turnstileResponse = turnstileInput ? turnstileInput.value : '';
 
       if (!username || !discordId || !banDate || !banReason || !unbanReason) {
         alert('Please fill in all required fields.');
@@ -610,7 +659,7 @@
       
       // ★ 캡차 체크 여부 확인
       if (!turnstileResponse) {
-        alert('Please complete the Captcha verification.');
+        alert('Please complete the Captcha verification. If you don\'t see it, please open this page in another browser and try again (Chrome or Safari). Disabling adblockers or script blockers might also help.');
         return;
       }
 
@@ -662,6 +711,20 @@
     function closeStatusModal() {
       document.getElementById('status-modal').classList.remove('open');
     }
+
+    // ── Info 모달 열기/닫기 ──────────────────────────────────────────
+    function openInfoModal() {
+      document.getElementById('info-modal').classList.add('open');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('info-modal').classList.remove('open');
+    }
+
+    // Info 모달 바깥 클릭 시 닫기
+    document.getElementById('info-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('info-modal')) closeInfoModal();
+    });
 
     // 바깥 클릭 시 모달 닫기
     document.getElementById('status-modal').addEventListener('click', (e) => {

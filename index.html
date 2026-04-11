@@ -332,6 +332,10 @@
       transition: opacity .2s;
     }
     .btn-search:hover { opacity: .88; }
+    .btn-search:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
 
     /* ── 상태 결과 ── */
     .status-result {
@@ -731,15 +735,35 @@
       if (e.target === document.getElementById('status-modal')) closeStatusModal();
     });
 
-    // ── 항소 상태 조회 ────────────────────────────────────────────────
+    // ── 항소 상태 조회 (3초 쿨다운) ─────────────────────────────────────
+    let statusCooldown = false;
     async function checkStatus() {
       const id = document.getElementById('status-input').value.trim();
       const resultEl = document.getElementById('status-result');
-
+      const searchBtn = document.querySelector('#status-modal .btn-search');
       if (!id) { alert('Please enter your Appeal ID.'); return; }
+      // 쿨다운 중이면 즉시 차단
+      if (statusCooldown) return;
+      // 쿨다운 시작 (3초 동안 버튼 비활성화 + 카운트다운 표시)
+      statusCooldown = true;
+      let remaining = 3;
+      searchBtn.disabled = true;
+      searchBtn.textContent = `Wait (${remaining}s)`;
+      const timer = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          statusCooldown = false;
+          searchBtn.disabled = false;
+          searchBtn.textContent = 'Search';
+        } else {
+          searchBtn.textContent = `Wait (${remaining}s)`;
+        }
+      }, 1000);
 
-      resultEl.style.display = 'none';
-      resultEl.className = 'status-result';
+      resultEl.className = 'status-result pending';
+      resultEl.innerHTML = '<strong>🔄 Searching…</strong>';
+      resultEl.style.display = 'block';
 
       try {
         const res = await fetch(`${WORKER_URL}/status?id=${encodeURIComponent(id)}`);

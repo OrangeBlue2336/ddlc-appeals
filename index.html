@@ -773,7 +773,7 @@
           const statusMap = {
             pending:  { cls: 'pending',  icon: '🔍', label: 'Under Review',  desc: 'Your appeal is currently being reviewed by the moderation team. Please be patient.' },
             approved: { cls: 'approved', icon: '✅', label: 'Approved',      desc: 'Your appeal has been approved. You may rejoin the server. <br> NOTE: You will start with 6/9 warnings permanently marked in your infraction history, meaning a major warn or three minor warns will result in a permanent ban.' },
-            rejected: { cls: 'rejected', icon: '❌', label: 'Rejected',      desc: 'Your appeal has been rejected. Do not submit another one immediately.' },
+            rejected: { cls: 'rejected', icon: '❌', label: 'Rejected',      desc: 'Your appeal has been rejected. You may not submit another one.' },
           };
           const s = statusMap[data.status] || { cls: 'error', icon: '⚠️', label: data.status, desc: '' };
           resultEl.className = `status-result ${s.cls}`;
